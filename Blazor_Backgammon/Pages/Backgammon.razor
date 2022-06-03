@@ -1,0 +1,71 @@
+﻿@using Blazor_Backgammon.ViewModels
+
+@page "/backgammon"
+@inject BackgammonViewModel viewModel
+
+<div class="container-board">
+    
+    <div class="game-board-top">
+        @for(int index = 0; index < viewModel.HalfFieldSpaces; index++)
+        {
+            @if(index % 2 == 0)
+            {
+                <div class="darkgreen-top field">
+                    @foreach(var playerChip in viewModel.GameField[index])
+                    {
+                        <div class="chip @("player" + playerChip)"></div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="darkmaroon-top field">
+                    @foreach(var playerChip in viewModel.GameField[index])
+                    {
+                        <div class="chip @("player" + playerChip)"></div>
+                    }
+                </div>
+            }
+            @if(index == 5)
+            {
+                <div class="field middle"></div>
+            }
+        }
+    </div>
+
+</div>
+<div class="container-board">
+    
+    <div class="game-board-bottom">
+        @for(int index = viewModel.HalfFieldSpaces; index < viewModel.TotalFieldSpaces; index++)
+        {
+            @if(index % 2 == 0)
+            {
+                <div class="darkgreen-bottom field">
+                    @foreach(var playerChip in viewModel.GameField[index])
+                    {
+                        <div class="chip @("player" + playerChip)"></div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="darkmaroon-bottom field">
+                    @foreach(var playerChip in viewModel.GameField[index])
+                    {
+                        <div class="chip @("player" + playerChip)"></div>
+                    }
+                </div>
+            }
+            @if(index == 17)
+            {
+                <div class="field middle"></div>
+            }
+        }
+    </div>
+
+</div>
+
+@code {
+
+}
