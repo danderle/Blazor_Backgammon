@@ -81,8 +81,9 @@ public class BackgammonViewModel
         {
             return;
         }
-
-        chip.IsSelected ^= true;
+        
+        var chips = GetPlayerChipsAtIndex(chip.FieldIndex);
+        chips.Last().IsSelected ^= true;
     }
 
     #endregion
@@ -92,20 +93,20 @@ public class BackgammonViewModel
     /// <summary>
     /// Creates a list of player chips
     /// </summary>
+    /// <param name="fieldIndex">The field index position on the board</param>
     /// <param name="numberToCreate">The number of chips to create</param>
     /// <param name="player">The player</param>
     /// <returns>The list of chips</returns>
-    private List<Chip> CreateChips(int numberToCreate, Player player)
+    private List<Chip> CreateChips(int fieldIndex, int numberToCreate, Player player)
     {
         var chips = new List<Chip>();
         for (int i = 0; i < numberToCreate; i++)
         {
-            chips.Add(new Chip(player));
+            chips.Add(new Chip(fieldIndex, player));
         }
         return chips;
     }
 
-    
     /// <summary>
     /// The Setup for the game start position
     /// </summary>
@@ -113,30 +114,30 @@ public class BackgammonViewModel
     {
         ActivePlayer = Player.One;
         GameField.Clear();
-        GameField.Add(CreateChips(2, Player.One));
+        GameField.Add(CreateChips(0, 2, Player.One));
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
-        GameField.Add(CreateChips(5, Player.Two));
+        GameField.Add(CreateChips(5, 5, Player.Two));
         GameField.Add(new List<Chip>());
-        GameField.Add(CreateChips(3, Player.Two));
-        GameField.Add(new List<Chip>());
-        GameField.Add(new List<Chip>());
-        GameField.Add(new List<Chip>());
-        GameField.Add(CreateChips(5, Player.One));
-        GameField.Add(CreateChips(5, Player.Two));
+        GameField.Add(CreateChips(7, 3, Player.Two));
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
-        GameField.Add(CreateChips(3, Player.One));
-        GameField.Add(new List<Chip>());
-        GameField.Add(CreateChips(5, Player.One));
-        GameField.Add(new List<Chip>());
+        GameField.Add(CreateChips(11, 5, Player.One));
+        GameField.Add(CreateChips(12, 5, Player.Two));
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
-        GameField.Add(CreateChips(2, Player.Two));
+        GameField.Add(CreateChips(16, 3, Player.One));
+        GameField.Add(new List<Chip>());
+        GameField.Add(CreateChips(18, 5, Player.One));
+        GameField.Add(new List<Chip>());
+        GameField.Add(new List<Chip>());
+        GameField.Add(new List<Chip>());
+        GameField.Add(new List<Chip>());
+        GameField.Add(CreateChips(23, 2, Player.Two));
     }
 
     #endregion
