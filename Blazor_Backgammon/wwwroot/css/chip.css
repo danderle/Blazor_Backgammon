@@ -1,0 +1,25 @@
+.chip {
+    box-sizing: border-box;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    border-radius: 99px;
+    background-color: transparent;
+}
+
+.playerOne {
+    background-color: #e09f3e;
+}
+
+.playerTwo {
+    background-color: white;
+}
+
+.isSelected {
+    background-color: greenyellow;
+}
+
+.test {
+    text-align: center;
+    background-color: red;
+}
+
