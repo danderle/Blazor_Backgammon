@@ -28,9 +28,9 @@
     flex-direction: column;
     width: 50px;
     height: auto;
-    padding: 10px;
+    padding: 5px;
     aspect-ratio: 1 / 8;
-    row-gap: 5px;
+    row-gap: 2px;
 }
 
 .darkgreen-top {
@@ -51,23 +51,22 @@
     background-color: #540b0e;
 }
 
-
-.chip {
-    box-sizing: border-box;
-    aspect-ratio: 1 / 1;
-    width: 100%;
-    border-radius: 99px;
-    background-color: transparent;
-}
-
-.player1 {
-    background-color: #e09f3e;
-}
-
-.player2 {
-    background-color: white;
-}
-
 .middle {
     background-color: #934b00;
 }
+
+.welcome {
+    text-align: center;
+    margin: 50px 0px;
+}
+
+.rainbow-text {
+    background: -webkit-linear-gradient(#eee, #333);
+    -webkit-text-fill-color: transparent;
+}
+
+.test {
+    text-align: center;
+    background-color: red;
+}
+
