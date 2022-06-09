@@ -8,6 +8,11 @@ namespace Blazor_Backgammon.ViewModels;
 /// </summary>
 public class BackgammonViewModel
 {
+    #region Fields
+
+
+    #endregion
+
     #region Public Properties
 
     /// <summary>
@@ -30,6 +35,11 @@ public class BackgammonViewModel
     /// </summary>
     public List<List<Chip>> GameField { get; set; } = new();
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public List<Dice> Dice { get; set; } = new ();
+
     #endregion
 
     #region Constructor
@@ -39,6 +49,10 @@ public class BackgammonViewModel
     /// </summary>
     public BackgammonViewModel()
     {
+        var dice1 = new Dice();
+        var dice2 = new Dice();
+        Dice.Add(dice1);
+        Dice.Add(dice2);
     }
 
     #endregion
@@ -84,6 +98,17 @@ public class BackgammonViewModel
         
         var chips = GetPlayerChipsAtIndex(chip.FieldIndex);
         chips.Last().IsSelected ^= true;
+    }
+
+    /// <summary>
+    /// Rolls each dice
+    /// </summary>
+    public void RollDice()
+    {
+        foreach (var dice in Dice)
+        {
+            dice.Roll();
+        }
     }
 
     #endregion

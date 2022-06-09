@@ -68,5 +68,9 @@
 .test {
     text-align: center;
     background-color: red;
+    border-block-color: black;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 5px;
 }
 

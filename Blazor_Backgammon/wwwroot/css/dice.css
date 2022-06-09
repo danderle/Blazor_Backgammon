@@ -1,0 +1,6 @@
+.dice {
+    display: inline-block;
+    border: 2px solid black;
+    background-color: #eee9de;
+    font-size: 30px;
+}
