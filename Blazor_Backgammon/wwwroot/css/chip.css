@@ -15,11 +15,16 @@
 }
 
 .isSelected {
-    background-color: greenyellow;
+    background-color: forestgreen;
 }
 
 .test {
     text-align: center;
     background-color: red;
+}
+
+.moveOption{
+    background-color: greenyellow;
+    border: black solid 1px;
 }
 

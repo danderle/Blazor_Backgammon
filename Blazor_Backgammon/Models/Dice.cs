@@ -9,6 +9,9 @@ namespace Blazor_Backgammon.Models
     {
         #region Public Properties
 
+        public bool IsSet { get; set; }
+
+
         public int Number { get; set; }
 
         #endregion
@@ -20,7 +23,7 @@ namespace Blazor_Backgammon.Models
         /// </summary>
         public Dice()
         {
-            Number = RandomNumber.RollDice();
+            Number = RandomNumber.GenerateDiceRoll();
         }
 
         #endregion
@@ -29,7 +32,7 @@ namespace Blazor_Backgammon.Models
 
         public void Roll()
         {
-            Number = RandomNumber.RollDice();
+            Number = RandomNumber.GenerateDiceRoll();
         }
 
         #endregion

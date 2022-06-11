@@ -19,10 +19,14 @@ namespace Blazor_Backgammon.Models
         /// </summary>
         public bool IsSelected { get; set; }
 
+        public bool IsMoveOption { get; set; }
+
         /// <summary>
         /// The gameboard index position
         /// </summary>
         public int FieldIndex { get; set; }
+
+        public MoveOption MoveOption { get; set; }
 
         #endregion
 
@@ -32,10 +36,12 @@ namespace Blazor_Backgammon.Models
         /// Constructor
         /// </summary>
         /// <param name="player"></param>
-        public Chip(int fieldIndex, Player player)
+        public Chip(int fieldIndex, Player player, MoveOption moveOption = null)
         {
             Player = player;
             FieldIndex = fieldIndex;
+            IsMoveOption = moveOption != null;
+            MoveOption = moveOption;
         } 
         
         #endregion

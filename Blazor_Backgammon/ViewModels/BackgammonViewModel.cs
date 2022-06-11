@@ -10,10 +10,13 @@ public class BackgammonViewModel
 {
     #region Fields
 
+    private bool chipIsActive = false;
+    private List<Tuple<int, Chip>> moveOptions = new List<Tuple<int, Chip>>();
 
     #endregion
 
     #region Public Properties
+
 
     /// <summary>
     /// The total number of spaces a player can move
@@ -95,9 +98,48 @@ public class BackgammonViewModel
         {
             return;
         }
-        
+
+        if (chip.IsMoveOption)
+        {
+            chip.IsMoveOption = false;
+            foreach (Dice dice in Dice)
+            {
+                if (chip.MoveOption.DiceNumber == dice.Number)
+                {
+                    dice.IsSet = true;
+                    chip.MoveOption.IsSet = true;
+                }
+            }
+            return;
+        }
+
         var chips = GetPlayerChipsAtIndex(chip.FieldIndex);
         chips.Last().IsSelected ^= true;
+        chipIsActive ^= true;
+
+        ShowPossibleOptions(chip.FieldIndex);
+    }
+
+    private void ShowPossibleOptions(int fieldIndex)
+    {
+        if (Dice[0].Number != Dice[1].Number)
+        {
+            if (ActivePlayer == Player.One)
+            {
+                foreach (var dice in Dice)
+                {
+                    var moveOption = fieldIndex + dice.Number;
+                    if (moveOption < TotalFieldSpaces)
+                    {
+                        var chipsOtherPlayer = GameField[fieldIndex].Count(item => item.Player != ActivePlayer);
+                        if (chipsOtherPlayer < 2)
+                        {
+                            GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(dice.Number)));
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /// <summary>

@@ -20,7 +20,9 @@
                         @foreach(var playerChip in viewModel.GetPlayerChipsAtIndex(index))
                         {
                             <div @onclick="() => viewModel.ClickedChip(playerChip)" 
-                                class="chip @("player" + playerChip.Player.ToString() + (playerChip.IsSelected? " isSelected" : ""))"></div>
+                                class="chip @("player" + playerChip.Player.ToString() + 
+                                (playerChip.IsSelected? " isSelected" : "") + 
+                                (playerChip.IsMoveOption? " moveOption" : ""))"></div>
                         }
                     </div>
                 }
@@ -30,7 +32,9 @@
                         @foreach(var playerChip in viewModel.GetPlayerChipsAtIndex(index))
                         {
                             <div @onclick="() => viewModel.ClickedChip(playerChip)"
-                                class="chip @("player" + playerChip.Player.ToString() + (playerChip.IsSelected? " isSelected" : ""))"></div>
+                                class="chip @("player" + playerChip.Player.ToString() + 
+                                (playerChip.IsSelected? " isSelected" : "") + 
+                                (playerChip.IsMoveOption? " moveOption" : ""))"></div>
                         }
                     </div>
                 }
@@ -53,7 +57,9 @@
                         @foreach(var playerChip in viewModel.GetPlayerChipsAtIndex(index))
                         {
                             <div @onclick="() => viewModel.ClickedChip(playerChip)"
-                                class="chip @("player" + playerChip.Player.ToString() + (playerChip.IsSelected? " isSelected" : ""))"></div>
+                                class="chip @(("player" + playerChip.Player.ToString()) + 
+                                (playerChip.IsSelected? " isSelected" : "") + 
+                                (playerChip.IsMoveOption? " moveOption" : ""))"></div>
                         }
                     </div>
                 }
@@ -63,7 +69,9 @@
                         @foreach(var playerChip in viewModel.GetPlayerChipsAtIndex(index))
                         {
                             <div @onclick="() => viewModel.ClickedChip(playerChip)"
-                                class="chip @("player" + playerChip.Player.ToString() + (playerChip.IsSelected? " isSelected" : ""))"></div>
+                                class="chip @("player" + playerChip.Player.ToString() +
+                                (playerChip.IsSelected? " isSelected" : "") + 
+                                (playerChip.IsMoveOption? " moveOption" : ""))"></div>
                         }
                     </div>
                 }
