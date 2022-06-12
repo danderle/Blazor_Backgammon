@@ -85,10 +85,13 @@
     </div>
 
     <button class="test" @onclick="() => viewModel.StartGame()">Start Game</button>
-    <button class="test" @onclick="() => viewModel.RollDice()">@(viewModel.ActivePlayer == Player.One? "Player 1" : "Player 2") Roll Dice</button>
+    <button class="rollDiceButton @(viewModel.HideButton?"hide":"")" 
+    @onclick="() => viewModel.RollDice()">@(viewModel.ActivePlayer == Player.One? "Player 1" : "Player 2") Roll Dice</button>
     <div>
-        <div class="dice">@(viewModel.Dice[0].Number)</div>
-        <div class="dice">@(viewModel.Dice[1].Number)</div>
+        @foreach(var number in viewModel.DiceNumbers)
+        {
+            <div class="dice">@number</div>
+        }
     </div>
 </body>
 
