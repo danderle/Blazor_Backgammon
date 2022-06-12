@@ -51,7 +51,12 @@
     background-color: #540b0e;
 }
 
-.middle {
+.middle-top {
+    background-color: #934b00;
+    flex-direction: column-reverse;
+}
+
+.middle-bottom {
     background-color: #934b00;
 }
 

@@ -10,8 +10,7 @@ public class BackgammonViewModel
 {
     #region Fields
 
-    private bool chipIsActive = false;
-    private List<Tuple<int, Chip>> moveOptions = new List<Tuple<int, Chip>>();
+    private bool _doubles;
 
     #endregion
 
@@ -33,6 +32,11 @@ public class BackgammonViewModel
     /// The current active player
     /// </summary>
     public Player ActivePlayer { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public List<Chip> RemovedList { get; set; } = new();
 
     /// <summary>
     /// The game field with all the chips
@@ -95,7 +99,7 @@ public class BackgammonViewModel
     /// Select a chip to move positions
     /// </summary>
     /// <param name="chip"></param>
-    public void ClickedChip(Chip chip)
+    public void MoveChip(Chip chip)
     {
         if (chip.Player != ActivePlayer)
         {
@@ -104,15 +108,32 @@ public class BackgammonViewModel
 
         if (chip.IsMoveOption)
         {
-            chip.IsMoveOption = false;
-            foreach (int number in DiceNumbers)
+            if (_doubles)
             {
-                if (chip.MoveOption.DiceNumber == number)
+                int sum = 0;
+                foreach (int number in DiceNumbers)
                 {
-                    chip.MoveOption.IsSet = true;
-                    chip.IsMoveOption = false;
-                    DiceNumbers.Remove(number);
-                    break;
+                    sum += number;
+                    if (chip.MoveOption.DiceNumber == sum)
+                    {
+                        chip.MoveOption.IsSet = true;
+                        chip.IsMoveOption = false;
+                        DiceNumbers.RemoveRange(0, sum / DiceNumbers.First());
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                foreach (int number in DiceNumbers)
+                {
+                    if (chip.MoveOption.DiceNumber == number)
+                    {
+                        chip.MoveOption.IsSet = true;
+                        chip.IsMoveOption = false;
+                        DiceNumbers.Remove(number);
+                        break;
+                    }
                 }
             }
 
@@ -124,12 +145,20 @@ public class BackgammonViewModel
             }
 
             RemoveSelectedChipAndChipOptions();
+            RemoveFromRemoveList();
+            KickOpponent(chip.FieldIndex);
+
             if (DiceNumbers.Count == 0)
             {
                 HideButton = false;
                 SwitchPlayer();
             }
 
+            return;
+        }
+        
+        if (RemovedList.Count(item => item.Player == ActivePlayer) > 0)
+        {
             return;
         }
 
@@ -146,11 +175,63 @@ public class BackgammonViewModel
         }
     }
 
+    private void RemoveFromRemoveList()
+    {
+        var selected = RemovedList.Find(item => item.IsSelected);
+        if (selected != null)
+        {
+            RemovedList.Remove(selected);
+        }
+    }
+
+    public void ReturnRemoved(Chip chip)
+    {
+        if (ActivePlayer != chip.Player)
+        {
+            return;
+        }
+
+        Chip targetChip;
+        int startIndex;
+        if (ActivePlayer == Player.One)
+        {
+            startIndex = -1;
+            targetChip = RemovedList.First(item => item.Player == Player.One);
+            targetChip.IsSelected ^= true;
+        }
+        else
+        {
+            startIndex = 24;
+            targetChip = RemovedList.First(item => item.Player == Player.Two);
+            targetChip.IsSelected ^= true;
+        }
+
+        if (targetChip.IsSelected)
+        {
+            ShowPossibleOptions(startIndex);
+        }
+        else
+        {
+            RemoveSelectedChipAndChipOptions();
+        }
+    }
+
+    private void KickOpponent(int fieldIndex)
+    {
+        var chipList = GameField[fieldIndex];
+        var removed = chipList.RemoveAll(chip => chip.Player != ActivePlayer);
+        if (removed != 0)
+        {
+            RemovedList.Add(new Chip(-1, ActivePlayer == Player.One ? Player.Two : Player.One));
+        }
+    }
+
     /// <summary>
     /// Rolls each dice
     /// </summary>
     public void RollDice()
     {
+        _doubles = false;
         foreach (var dice in Dice)
         {
             dice.Roll();
@@ -161,6 +242,7 @@ public class BackgammonViewModel
         {
             DiceNumbers.Add(Dice.Last().Number);
             DiceNumbers.Add(Dice.Last().Number);
+            _doubles = true;
         }
 
         HideButton = true;
@@ -240,7 +322,7 @@ public class BackgammonViewModel
     /// <param name="fieldIndex"></param>
     private void ShowPossibleOptions(int fieldIndex)
     {
-        if ((DiceNumbers.Count > 1 && DiceNumbers[0] != DiceNumbers[1]) || DiceNumbers.Count == 1)
+        if ((DiceNumbers.Count > 1 && !_doubles) || DiceNumbers.Count == 1)
         {
             foreach (var number in DiceNumbers)
             {
@@ -313,7 +395,11 @@ public class BackgammonViewModel
                         var chipsOtherPlayer = GameField[moveOption].Count(item => item.Player != ActivePlayer);
                         if (chipsOtherPlayer < 2)
                         {
-                            GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(number)));
+                            GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(sum)));
+                        }
+                        else
+                        {
+                            return;
                         }
                     }
                 }
@@ -330,7 +416,11 @@ public class BackgammonViewModel
                         var chipsOtherPlayer = GameField[moveOption].Count(item => item.Player != ActivePlayer);
                         if (chipsOtherPlayer < 2)
                         {
-                            GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(number)));
+                            GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(sum)));
+                        }
+                        else
+                        {
+                            return;
                         }
                     }
                 }
