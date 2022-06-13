@@ -9,8 +9,11 @@
 
     <h1 class="welcome">Welcome to Backgammon</h1>
 
-    <div class="container-board">
+    <div class="container-board ">
     
+        <div class="left-border-top">
+            <div></div>
+        </div>
         <div class="game-board-top">
             @for(int index = 0; index < viewModel.HalfFieldSpaces; index++)
             {
@@ -62,6 +65,9 @@
     </div>
     <div class="container-board">
     
+        <div class="left-border-bottom">
+            <div></div>
+        </div>
         <div class="game-board-bottom">
             @for(int index = viewModel.HalfFieldSpaces; index < viewModel.TotalFieldSpaces; index++)
             {
@@ -112,8 +118,10 @@
     </div>
 
     <button class="test" @onclick="() => viewModel.StartGame()">Start Game</button>
-    <button class="rollDiceButton @(viewModel.HideRollDiceButton?"hide":"")" 
-    @onclick="() => viewModel.RollDice()">@(viewModel.ActivePlayer == Player.One? "Player 1" : "Player 2") Roll Dice</button>
+    <button class="rollDiceButton @(viewModel.HideRollDiceButton?"hide":"")" @onclick="() => viewModel.RollDice()">
+        @(viewModel.ActivePlayer == Player.One? "Player 1" : "Player 2") Roll Dice
+    </button>
+    <button class="test @(viewModel.HideSkipTurnButton?"hide":"")" @onclick="() => viewModel.SwitchPlayer()">Skip Turn</button>
     <div>
         @foreach(var number in viewModel.DiceNumbers)
         {

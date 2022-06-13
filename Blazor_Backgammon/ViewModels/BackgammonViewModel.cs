@@ -20,9 +20,24 @@ public class BackgammonViewModel
     #region Public Properties
 
     /// <summary>
+    /// Flag to let us know if player one has reached the base with all chips
+    /// </summary>
+    public bool PlayerOneReachedBase { get; private set; }
+
+    /// <summary>
+    /// Flag to let us know if player two has reached the base with all chips
+    /// </summary>
+    public bool PlayerTwoReachedBase { get; private set; }
+
+    /// <summary>
     /// Flag to hide the roll dice button
     /// </summary>
     public bool HideRollDiceButton { get; set; }
+
+    /// <summary>
+    /// Flag to hide the skip turn button
+    /// </summary>
+    public bool HideSkipTurnButton { get; set; }
 
     /// <summary>
     /// The total number of spaces a player can move
@@ -58,6 +73,11 @@ public class BackgammonViewModel
     /// The dice numbers
     /// </summary>
     public List<int> DiceNumbers { get; set; } = new ();
+
+    /// <summary>
+    /// The chips which have reached the finish line
+    /// </summary>
+    public List<Chip> HomeList { get; private set; } = new ();
 
     #endregion
 
@@ -202,41 +222,65 @@ public class BackgammonViewModel
         HideRollDiceButton = true;
     }
 
+    /// <summary>
+    /// Switches the active player
+    /// </summary>
+    public void SwitchPlayer()
+    {
+        if (ActivePlayer == Player.One)
+        {
+            ActivePlayer = Player.Two;
+        }
+        else
+        {
+            ActivePlayer = Player.One;
+        }
+        
+        // Show roll dice button
+        HideRollDiceButton = false;
+
+        //Clear dice incase we skipped a turn
+        DiceNumbers.Clear();
+    }
+
     #endregion
 
     #region Private Methods
 
+    /// <summary>
+    /// Make the move option to a new position on the board
+    /// </summary>
+    /// <param name="chip"></param>
     private void HandleMoveOptionClick(Chip chip)
     {
         //if we rolled doubles
-            if (_doubles)
+        if (_doubles)
+        {
+            int sum = 0;
+            foreach (int number in DiceNumbers)
             {
-                int sum = 0;
-                foreach (int number in DiceNumbers)
+                //sum the dice numbers to verify how many dicenumbers where used
+                sum += number;
+                if (chip.MoveOption.DiceNumber == sum)
                 {
-                    //sum the dice numbers to verify how many dicenumbers where used
-                    sum += number;
-                    if (chip.MoveOption.DiceNumber == sum)
-                    {
-                        chip.MoveOption.IsSet = true;
-                        chip.IsMoveOption = false;
-                        DiceNumbers.RemoveRange(0, sum / DiceNumbers.First());
-                        break;
-                    }
+                    chip.MoveOption.IsSet = true;
+                    chip.IsMoveOption = false;
+                    DiceNumbers.RemoveRange(0, sum / DiceNumbers.First());
+                    break;
                 }
             }
-            else
+        }
+        else
+        {
+            // just check which dice number was used
+            foreach (int number in DiceNumbers)
             {
-                // just check which dice number was used
-                foreach (int number in DiceNumbers)
+                if (chip.MoveOption.DiceNumber == number)
                 {
-                    if (chip.MoveOption.DiceNumber == number)
-                    {
-                        chip.MoveOption.IsSet = true;
-                        chip.IsMoveOption = false;
-                        DiceNumbers.Remove(number);
-                        break;
-                    }
+                    chip.MoveOption.IsSet = true;
+                    chip.IsMoveOption = false;
+                    DiceNumbers.Remove(number);
+                    break;
                 }
             }
 
@@ -247,17 +291,54 @@ public class BackgammonViewModel
                 chip.IsMoveOption = false;
                 DiceNumbers.Clear();
             }
+        }
 
-            RemoveSelectedChipAndChipOptions();
-            RemoveFromExiledList();
-            KickOpponent(chip.FieldIndex);
+        RemoveSelectedChipAndChipOptions();
+        RemoveFromExiledList();
+        KickOpponent(chip.FieldIndex);
+        CheckIfAllChipsAreInBase();
 
-            // If all dicenumbers were used switch player turn
-            if (DiceNumbers.Count == 0)
+
+        // If all dicenumbers were used switch player turn
+        if (DiceNumbers.Count == 0)
+        {
+            SwitchPlayer();
+        }
+    }
+
+    /// <summary>
+    /// Checks if all the chips of a player have reached their base
+    /// </summary>
+    private void CheckIfAllChipsAreInBase()
+    {
+        if (ActivePlayer == Player.One)
+        {
+            for (int index = 5; index < TotalFieldSpaces; index++)
             {
-                HideRollDiceButton = false;
-                SwitchPlayer();
+                if(GameField[index].Count(chip => chip.Player == Player.One) == 0 &&
+                    ExiledChips.Count(chip => chip.Player == Player.One) == 0)
+                {
+                    PlayerOneReachedBase = true;
+                    return;
+                }
+
+                PlayerOneReachedBase = false;
             }
+        }
+        else
+        {
+            for (int index = 0; index < TotalFieldSpaces - 5; index++)
+            {
+                if(GameField[index].Count(chip => chip.Player == Player.Two) == 0 &&
+                    ExiledChips.Count(chip => chip.Player == Player.Two) == 0)
+                {
+                    PlayerTwoReachedBase = true;
+                    return;
+                }
+
+                PlayerTwoReachedBase = false;
+            }
+        }
     }
 
     /// <summary>
@@ -301,21 +382,6 @@ public class BackgammonViewModel
             chips.Add(new Chip(fieldIndex, player));
         }
         return chips;
-    }
-
-    /// <summary>
-    /// Switches the active player
-    /// </summary>
-    private void SwitchPlayer()
-    {
-        if (ActivePlayer == Player.One)
-        {
-            ActivePlayer = Player.Two;
-        }
-        else
-        {
-            ActivePlayer = Player.One;
-        }
     }
 
     /// <summary>
@@ -369,6 +435,10 @@ public class BackgammonViewModel
                 {
                     AddMoveOption(moveOption, number);
                 }
+                else
+                {
+                    CheckIfPlayerCanClearChip();
+                }
             }
 
             // Add sum dicenumber move options
@@ -376,21 +446,9 @@ public class BackgammonViewModel
             {
                 var sum = DiceNumbers.Sum();
                 var sumOption = fieldIndex + (moveDirection * sum);
-                if (sumOption < TotalFieldSpaces)
+                if (sumOption < TotalFieldSpaces && sumOption >= 0)
                 {
-                    var chipsOtherPlayer = GameField[sumOption].Count(item => item.Player != ActivePlayer);
-                    if (chipsOtherPlayer < 2)
-                    {
-                        GameField[sumOption].Add(new Chip(sumOption, ActivePlayer, new MoveOption(sum)));
-                    }
-                }
-                else if (sumOption >= 0)
-                {
-                    var chipsOtherPlayer = GameField[sumOption].Count(item => item.Player != ActivePlayer);
-                    if (chipsOtherPlayer < 2)
-                    {
-                        GameField[sumOption].Add(new Chip(sumOption, ActivePlayer, new MoveOption(sum)));
-                    }
+                    AddMoveOption(sumOption, sum);
                 }
             }
         }
@@ -401,26 +459,9 @@ public class BackgammonViewModel
             {
                 sum += number;
                 var moveOption = fieldIndex + (moveDirection * sum);
-                if (moveOption < TotalFieldSpaces)
+                if (moveOption < TotalFieldSpaces && moveOption >= 0)
                 {
-                    var chipsOtherPlayer = GameField[moveOption].Count(item => item.Player != ActivePlayer);
-                    if (chipsOtherPlayer < 2)
-                    {
-                        GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(sum)));
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
-                else if (moveOption >= 0)
-                {
-                    var chipsOtherPlayer = GameField[moveOption].Count(item => item.Player != ActivePlayer);
-                    if (chipsOtherPlayer < 2)
-                    {
-                        GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(sum)));
-                    }
-                    else
+                    if (!AddMoveOption(moveOption, sum))
                     {
                         return;
                     }
@@ -429,6 +470,24 @@ public class BackgammonViewModel
         }
     }
 
+    private void CheckIfPlayerCanClearChip()
+    {
+        if (ActivePlayer == Player.One && PlayerOneReachedBase)
+        {
+            HomeList.Add(new Chip(0, ActivePlayer));
+        }
+        else if (ActivePlayer == Player.Two && PlayerTwoReachedBase)
+        {
+            HomeList.Add(new Chip(0, ActivePlayer));
+        }
+    }
+
+    /// <summary>
+    /// Adds move options to the gamefield with the possible fieldIndex and corresponding dicenumber
+    /// </summary>
+    /// <param name="moveOption">The possible field position</param>
+    /// <param name="dicenumber">either die dicenumber or sum of 2 dice or multiples of doubles</param>
+    /// <returns></returns>
     private bool AddMoveOption(int moveOption, int dicenumber)
     {
         bool added = false;

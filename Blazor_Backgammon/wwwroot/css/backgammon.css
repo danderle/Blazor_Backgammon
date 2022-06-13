@@ -3,11 +3,23 @@
     flex-direction: row;
     justify-content: center;
     border-color: #934b00;
-    border-radius: 10px 10px 0px 0px;
-    border-width: 20px 20px 0px 20px;
+    border-radius: 0px 10px 0px 0px;
+    border-width: 20px 20px 0px 0px;
     border-style: solid;
 }
+.left-border-top {
+    background-color: #934b00;
+    width: 50px; 
+    aspect-ratio: 1/8; 
+    border-radius: 10px 0px 0px 0px;
+}
 
+.left-border-bottom {
+    background-color: #934b00;
+    width: 50px;
+    aspect-ratio: 1/8;
+    border-radius: 0px 0px 0px 10px;
+}
 .container-board {
     display: flex;
     justify-content: center;
@@ -18,8 +30,8 @@
     flex-direction: row-reverse;
     justify-content: center;
     border-color: #934b00;
-    border-radius: 0px 0px 10px 10px;
-    border-width: 0px 20px 20px 20px;
+    border-radius: 0px 0px 10px 0px;
+    border-width: 0px 20px 20px 0px;
     border-style: solid;
 }
 
