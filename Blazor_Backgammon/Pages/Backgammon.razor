@@ -44,11 +44,11 @@
                 @if(index == 5)
                 {
                     <div class="field middle-top">
-                        @foreach(var chip in viewModel.RemovedList)
+                        @foreach(var chip in viewModel.ExiledChips)
                         {
                             if(chip.Player == Player.One)
                             {
-                                <div @onclick="() => viewModel.ReturnRemoved(chip)"
+                                <div @onclick="() => viewModel.ReturnExiledChip(chip)"
                                     class="chip @("player" + chip.Player.ToString() +
                                     (chip.IsSelected? " isSelected" : ""))">
                                 </div>
@@ -94,11 +94,11 @@
                 @if(index == 17)
                 {
                     <div class="field middle-bottom">
-                        @foreach(var chip in viewModel.RemovedList)
+                        @foreach(var chip in viewModel.ExiledChips)
                         {
                             if(chip.Player == Player.Two)
                             {
-                                <div @onclick="() => viewModel.ReturnRemoved(chip)"
+                                <div @onclick="() => viewModel.ReturnExiledChip(chip)"
                                     class="chip @("player" + chip.Player.ToString() + 
                                     (chip.IsSelected? " isSelected" : ""))">
                                 </div>
@@ -112,7 +112,7 @@
     </div>
 
     <button class="test" @onclick="() => viewModel.StartGame()">Start Game</button>
-    <button class="rollDiceButton @(viewModel.HideButton?"hide":"")" 
+    <button class="rollDiceButton @(viewModel.HideRollDiceButton?"hide":"")" 
     @onclick="() => viewModel.RollDice()">@(viewModel.ActivePlayer == Player.One? "Player 1" : "Player 2") Roll Dice</button>
     <div>
         @foreach(var number in viewModel.DiceNumbers)

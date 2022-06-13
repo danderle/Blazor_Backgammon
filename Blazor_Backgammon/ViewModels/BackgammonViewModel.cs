@@ -10,13 +10,19 @@ public class BackgammonViewModel
 {
     #region Fields
 
+    /// <summary>
+    /// Flag to let us know if we rolled doubles
+    /// </summary>
     private bool _doubles;
 
     #endregion
 
     #region Public Properties
 
-    public bool HideButton { get; set; }
+    /// <summary>
+    /// Flag to hide the roll dice button
+    /// </summary>
+    public bool HideRollDiceButton { get; set; }
 
     /// <summary>
     /// The total number of spaces a player can move
@@ -34,9 +40,9 @@ public class BackgammonViewModel
     public Player ActivePlayer { get; set; }
 
     /// <summary>
-    /// 
+    /// The list with the exiled chips
     /// </summary>
-    public List<Chip> RemovedList { get; set; } = new();
+    public List<Chip> ExiledChips { get; set; } = new();
 
     /// <summary>
     /// The game field with all the chips
@@ -44,10 +50,13 @@ public class BackgammonViewModel
     public List<List<Chip>> GameField { get; set; } = new();
 
     /// <summary>
-    /// 
+    /// The dice
     /// </summary>
     public List<Dice> Dice { get; set; } = new ();
 
+    /// <summary>
+    /// The dice numbers
+    /// </summary>
     public List<int> DiceNumbers { get; set; } = new ();
 
     #endregion
@@ -106,65 +115,25 @@ public class BackgammonViewModel
             return;
         }
 
+        // If clicked chip is a move option
         if (chip.IsMoveOption)
         {
-            if (_doubles)
-            {
-                int sum = 0;
-                foreach (int number in DiceNumbers)
-                {
-                    sum += number;
-                    if (chip.MoveOption.DiceNumber == sum)
-                    {
-                        chip.MoveOption.IsSet = true;
-                        chip.IsMoveOption = false;
-                        DiceNumbers.RemoveRange(0, sum / DiceNumbers.First());
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                foreach (int number in DiceNumbers)
-                {
-                    if (chip.MoveOption.DiceNumber == number)
-                    {
-                        chip.MoveOption.IsSet = true;
-                        chip.IsMoveOption = false;
-                        DiceNumbers.Remove(number);
-                        break;
-                    }
-                }
-            }
-
-            if (chip.MoveOption.DiceNumber == DiceNumbers.Sum())
-            {
-                chip.MoveOption.IsSet = true;
-                chip.IsMoveOption = false;
-                DiceNumbers.Clear();
-            }
-
-            RemoveSelectedChipAndChipOptions();
-            RemoveFromRemoveList();
-            KickOpponent(chip.FieldIndex);
-
-            if (DiceNumbers.Count == 0)
-            {
-                HideButton = false;
-                SwitchPlayer();
-            }
+            HandleMoveOptionClick(chip);
 
             return;
         }
         
-        if (RemovedList.Count(item => item.Player == ActivePlayer) > 0)
+        // Check if there are any exiled chips. They need to return before other moves
+        if (ExiledChips.Count(item => item.Player == ActivePlayer) > 0)
         {
             return;
         }
 
+        // We habe selected or deselected a chip
         var chips = GetPlayerChipsAtIndex(chip.FieldIndex);
         chips.Last().IsSelected ^= true;
 
+        // if we selected a chip then show move options
         if (chips.Last().IsSelected)
         {
             ShowPossibleOptions(chip.FieldIndex);
@@ -175,16 +144,11 @@ public class BackgammonViewModel
         }
     }
 
-    private void RemoveFromRemoveList()
-    {
-        var selected = RemovedList.Find(item => item.IsSelected);
-        if (selected != null)
-        {
-            RemovedList.Remove(selected);
-        }
-    }
-
-    public void ReturnRemoved(Chip chip)
+    /// <summary>
+    /// Return an exiled chip to the game board
+    /// </summary>
+    /// <param name="chip"></param>
+    public void ReturnExiledChip(Chip chip)
     {
         if (ActivePlayer != chip.Player)
         {
@@ -196,13 +160,13 @@ public class BackgammonViewModel
         if (ActivePlayer == Player.One)
         {
             startIndex = -1;
-            targetChip = RemovedList.First(item => item.Player == Player.One);
+            targetChip = ExiledChips.First(item => item.Player == Player.One);
             targetChip.IsSelected ^= true;
         }
         else
         {
             startIndex = 24;
-            targetChip = RemovedList.First(item => item.Player == Player.Two);
+            targetChip = ExiledChips.First(item => item.Player == Player.Two);
             targetChip.IsSelected ^= true;
         }
 
@@ -213,16 +177,6 @@ public class BackgammonViewModel
         else
         {
             RemoveSelectedChipAndChipOptions();
-        }
-    }
-
-    private void KickOpponent(int fieldIndex)
-    {
-        var chipList = GameField[fieldIndex];
-        var removed = chipList.RemoveAll(chip => chip.Player != ActivePlayer);
-        if (removed != 0)
-        {
-            RemovedList.Add(new Chip(-1, ActivePlayer == Player.One ? Player.Two : Player.One));
         }
     }
 
@@ -245,12 +199,92 @@ public class BackgammonViewModel
             _doubles = true;
         }
 
-        HideButton = true;
+        HideRollDiceButton = true;
     }
 
     #endregion
 
     #region Private Methods
+
+    private void HandleMoveOptionClick(Chip chip)
+    {
+        //if we rolled doubles
+            if (_doubles)
+            {
+                int sum = 0;
+                foreach (int number in DiceNumbers)
+                {
+                    //sum the dice numbers to verify how many dicenumbers where used
+                    sum += number;
+                    if (chip.MoveOption.DiceNumber == sum)
+                    {
+                        chip.MoveOption.IsSet = true;
+                        chip.IsMoveOption = false;
+                        DiceNumbers.RemoveRange(0, sum / DiceNumbers.First());
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                // just check which dice number was used
+                foreach (int number in DiceNumbers)
+                {
+                    if (chip.MoveOption.DiceNumber == number)
+                    {
+                        chip.MoveOption.IsSet = true;
+                        chip.IsMoveOption = false;
+                        DiceNumbers.Remove(number);
+                        break;
+                    }
+                }
+            }
+
+            // check if both dice were used for move option
+            if (chip.MoveOption.DiceNumber == DiceNumbers.Sum())
+            {
+                chip.MoveOption.IsSet = true;
+                chip.IsMoveOption = false;
+                DiceNumbers.Clear();
+            }
+
+            RemoveSelectedChipAndChipOptions();
+            RemoveFromExiledList();
+            KickOpponent(chip.FieldIndex);
+
+            // If all dicenumbers were used switch player turn
+            if (DiceNumbers.Count == 0)
+            {
+                HideRollDiceButton = false;
+                SwitchPlayer();
+            }
+    }
+
+    /// <summary>
+    /// If landing on the same field as opponenet we exile opponents chip
+    /// </summary>
+    /// <param name="fieldIndex"></param>
+    private void KickOpponent(int fieldIndex)
+    {
+        var chipList = GameField[fieldIndex];
+        var removed = chipList.RemoveAll(chip => chip.Player != ActivePlayer);
+        if (removed != 0)
+        {
+            ExiledChips.Add(new Chip(-1, ActivePlayer == Player.One ? Player.Two : Player.One));
+        }
+    }
+
+    /// <summary>
+    /// Remove a selected exiled chip from list
+    /// </summary>
+    private void RemoveFromExiledList()
+    {
+        var selected = ExiledChips.Find(item => item.IsSelected);
+        if (selected != null)
+        {
+            ExiledChips.Remove(selected);
+        }
+    }
 
     /// <summary>
     /// Creates a list of player chips
@@ -317,115 +351,95 @@ public class BackgammonViewModel
     }
 
     /// <summary>
-    /// 
+    /// Adds chips to the game field which are marked as move options for the selected chip and
+    /// current rolled dice numbers
     /// </summary>
     /// <param name="fieldIndex"></param>
     private void ShowPossibleOptions(int fieldIndex)
     {
+        int moveDirection = ActivePlayer == Player.One ? 1 : -1;
+
+        // If no doubles and we have more than 1 dice number left to use or exactly 1 dice left
         if ((DiceNumbers.Count > 1 && !_doubles) || DiceNumbers.Count == 1)
         {
             foreach (var number in DiceNumbers)
             {
-                if (ActivePlayer == Player.One)
+                var moveOption = fieldIndex + (moveDirection * number);
+                if (moveOption < TotalFieldSpaces && moveOption >= 0)
                 {
-                    var moveOption = fieldIndex + number;
-                    if (moveOption < TotalFieldSpaces)
-                    {
-                        var chipsOtherPlayer = GameField[moveOption].Count(item => item.Player != ActivePlayer);
-                        if (chipsOtherPlayer < 2)
-                        {
-                            GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(number)));
-                        }
-                    }
-                }
-                else
-                {
-                    var moveOption = fieldIndex - number;
-                    if (moveOption >= 0)
-                    {
-                        var chipsOtherPlayer = GameField[moveOption].Count(item => item.Player != ActivePlayer);
-                        if (chipsOtherPlayer < 2)
-                        {
-                            GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(number)));
-                        }
-                    }
+                    AddMoveOption(moveOption, number);
                 }
             }
 
+            // Add sum dicenumber move options
             if (DiceNumbers.Count > 1)
             {
                 var sum = DiceNumbers.Sum();
-                if (ActivePlayer == Player.One)
+                var sumOption = fieldIndex + (moveDirection * sum);
+                if (sumOption < TotalFieldSpaces)
                 {
-                    var sumOption = fieldIndex + sum;
-                    if (sumOption < TotalFieldSpaces)
+                    var chipsOtherPlayer = GameField[sumOption].Count(item => item.Player != ActivePlayer);
+                    if (chipsOtherPlayer < 2)
                     {
-                        var chipsOtherPlayer = GameField[sumOption].Count(item => item.Player != ActivePlayer);
-                        if (chipsOtherPlayer < 2)
-                        {
-                            GameField[sumOption].Add(new Chip(sumOption, ActivePlayer, new MoveOption(sum)));
-                        }
+                        GameField[sumOption].Add(new Chip(sumOption, ActivePlayer, new MoveOption(sum)));
                     }
                 }
-                else
+                else if (sumOption >= 0)
                 {
-                    var sumOption = fieldIndex - sum;
-                    if (sumOption >= 0)
+                    var chipsOtherPlayer = GameField[sumOption].Count(item => item.Player != ActivePlayer);
+                    if (chipsOtherPlayer < 2)
                     {
-                        var chipsOtherPlayer = GameField[sumOption].Count(item => item.Player != ActivePlayer);
-                        if (chipsOtherPlayer < 2)
-                        {
-                            GameField[sumOption].Add(new Chip(sumOption, ActivePlayer, new MoveOption(sum)));
-                        }
+                        GameField[sumOption].Add(new Chip(sumOption, ActivePlayer, new MoveOption(sum)));
                     }
                 }
             }
         }
         else
         {
-            if (ActivePlayer == Player.One)
+            int sum = 0;
+            foreach (var number in DiceNumbers)
             {
-                int sum = 0;
-                foreach (var number in DiceNumbers)
+                sum += number;
+                var moveOption = fieldIndex + (moveDirection * sum);
+                if (moveOption < TotalFieldSpaces)
                 {
-                    sum += number;
-                    var moveOption = fieldIndex + sum;
-                    if (moveOption < TotalFieldSpaces)
+                    var chipsOtherPlayer = GameField[moveOption].Count(item => item.Player != ActivePlayer);
+                    if (chipsOtherPlayer < 2)
                     {
-                        var chipsOtherPlayer = GameField[moveOption].Count(item => item.Player != ActivePlayer);
-                        if (chipsOtherPlayer < 2)
-                        {
-                            GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(sum)));
-                        }
-                        else
-                        {
-                            return;
-                        }
+                        GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(sum)));
+                    }
+                    else
+                    {
+                        return;
                     }
                 }
-            }
-            else
-            {
-                int sum = 0;
-                foreach (var number in DiceNumbers)
+                else if (moveOption >= 0)
                 {
-                    sum += number;
-                    var moveOption = fieldIndex - sum;
-                    if (moveOption >= 0)
+                    var chipsOtherPlayer = GameField[moveOption].Count(item => item.Player != ActivePlayer);
+                    if (chipsOtherPlayer < 2)
                     {
-                        var chipsOtherPlayer = GameField[moveOption].Count(item => item.Player != ActivePlayer);
-                        if (chipsOtherPlayer < 2)
-                        {
-                            GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(sum)));
-                        }
-                        else
-                        {
-                            return;
-                        }
+                        GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(sum)));
+                    }
+                    else
+                    {
+                        return;
                     }
                 }
             }
         }
+    }
+
+    private bool AddMoveOption(int moveOption, int dicenumber)
+    {
+        bool added = false;
+        var chipsOtherPlayer = GameField[moveOption].Count(item => item.Player != ActivePlayer);
+        if (chipsOtherPlayer < 2)
+        {
+            GameField[moveOption].Add(new Chip(moveOption, ActivePlayer, new MoveOption(dicenumber)));
+            added = true;
+        }
+
+        return added;
     }
 
     /// <summary>
