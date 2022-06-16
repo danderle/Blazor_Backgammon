@@ -9,16 +9,27 @@
 }
 .left-border-top {
     background-color: #934b00;
-    width: 50px; 
-    aspect-ratio: 1/8; 
+    width: 70px; 
     border-radius: 10px 0px 0px 0px;
+    padding: 20px 10px 20px 10px;
+}
+
+.container-home-top {
+    background-color: sandybrown;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    row-gap: 2px;
+    padding: 2px;
+    border-radius: 3px;
 }
 
 .left-border-bottom {
     background-color: #934b00;
-    width: 50px;
-    aspect-ratio: 1/8;
+    width: 70px;
     border-radius: 0px 0px 0px 10px;
+    padding: 10px 10px 20px 10px;
 }
 .container-board {
     display: flex;
@@ -33,6 +44,17 @@
     border-radius: 0px 0px 10px 0px;
     border-width: 0px 20px 20px 0px;
     border-style: solid;
+}
+
+.container-home-bottom {
+    background-color: sandybrown;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    row-gap: 2px;
+    padding: 2px;
+    border-radius: 3px;
 }
 
 .field {

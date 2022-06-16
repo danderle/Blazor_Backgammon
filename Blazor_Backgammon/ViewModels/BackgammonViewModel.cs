@@ -22,12 +22,12 @@ public class BackgammonViewModel
     /// <summary>
     /// Flag to let us know if player one has reached the base with all chips
     /// </summary>
-    public bool PlayerOneReachedBase { get; private set; }
+    public bool PlayerOneReachedBase { get; private set; } = true;
 
     /// <summary>
     /// Flag to let us know if player two has reached the base with all chips
     /// </summary>
-    public bool PlayerTwoReachedBase { get; private set; }
+    public bool PlayerTwoReachedBase { get; private set; } = true;
 
     /// <summary>
     /// Flag to hide the roll dice button
@@ -92,6 +92,18 @@ public class BackgammonViewModel
         var dice2 = new Dice();
         Dice.Add(dice1);
         Dice.Add(dice2);
+
+        for (int index = 0; index < 30; index++)
+        {
+            if (index < 15)
+            {
+                HomeList.Add(new Chip(-1, Player.Two));
+            }
+            else
+            {
+                HomeList.Add(new Chip(-1, Player.One));
+            }
+        }
     }
 
     #endregion
@@ -470,6 +482,9 @@ public class BackgammonViewModel
         }
     }
 
+    /// <summary>
+    /// Check if player can clear a chip from the base
+    /// </summary>
     private void CheckIfPlayerCanClearChip()
     {
         if (ActivePlayer == Player.One && PlayerOneReachedBase)
@@ -532,6 +547,10 @@ public class BackgammonViewModel
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(CreateChips(23, 2, Player.Two));
+
+        HomeList.Clear();
+        PlayerOneReachedBase = false;
+        PlayerTwoReachedBase = false;
     }
 
     #endregion
