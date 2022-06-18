@@ -255,6 +255,27 @@ public class BackgammonViewModel
         DiceNumbers.Clear();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="chip"></param>
+    public void MoveToHome(Chip chip)
+    {
+        if (chip.IsMoveOption)
+        {
+            chip.IsMoveOption = false;
+            DiceNumbers.Remove(chip.MoveOption.DiceNumber);
+
+            RemoveSelectedChipAndChipOptions();
+
+            // If all dicenumbers were used switch player turn
+            if (DiceNumbers.Count == 0)
+            {
+                SwitchPlayer();
+            }
+        }
+    }
+
     #endregion
 
     #region Private Methods
@@ -325,30 +346,40 @@ public class BackgammonViewModel
     {
         if (ActivePlayer == Player.One)
         {
-            for (int index = 5; index < TotalFieldSpaces; index++)
+            if (ExiledChips.Count(chip => chip.Player == Player.One) > 0)
             {
-                if(GameField[index].Count(chip => chip.Player == Player.One) == 0 &&
-                    ExiledChips.Count(chip => chip.Player == Player.One) == 0)
+                PlayerOneReachedBase = false;
+                return;
+            }
+
+            for (int index = 0; index < TotalFieldSpaces-6; index++)
+            {
+                if(GameField[index].Count(chip => chip.Player == Player.One) > 0)
                 {
-                    PlayerOneReachedBase = true;
+                    PlayerOneReachedBase = false;
                     return;
                 }
-
-                PlayerOneReachedBase = false;
             }
+
+            PlayerOneReachedBase = true;
         }
         else
         {
-            for (int index = 0; index < TotalFieldSpaces - 5; index++)
+            if (ExiledChips.Count(chip => chip.Player == Player.Two) > 0)
             {
-                if(GameField[index].Count(chip => chip.Player == Player.Two) == 0 &&
-                    ExiledChips.Count(chip => chip.Player == Player.Two) == 0)
+                PlayerTwoReachedBase = false;
+                return;
+            }
+
+            for (int index = 6; index < TotalFieldSpaces; index++)
+            {
+                if(GameField[index].Count(chip => chip.Player > Player.Two) > 0)
                 {
-                    PlayerTwoReachedBase = true;
+                    PlayerTwoReachedBase = false;
                     return;
                 }
 
-                PlayerTwoReachedBase = false;
+                PlayerTwoReachedBase = true;
             }
         }
     }
@@ -426,6 +457,15 @@ public class BackgammonViewModel
                 }
             }
         }
+
+        foreach (var chip in HomeList)
+        {
+            if (chip.IsMoveOption)
+            {
+                HomeList.Remove(chip);
+                break;
+            }
+        }
     }
 
     /// <summary>
@@ -449,7 +489,7 @@ public class BackgammonViewModel
                 }
                 else
                 {
-                    CheckIfPlayerCanClearChip();
+                    CheckIfPlayerCanClearChip(number, moveOption, fieldIndex);
                 }
             }
 
@@ -485,15 +525,55 @@ public class BackgammonViewModel
     /// <summary>
     /// Check if player can clear a chip from the base
     /// </summary>
-    private void CheckIfPlayerCanClearChip()
+    /// <param name="diceNumber"></param>
+    private void CheckIfPlayerCanClearChip(int diceNumber, int moveOption, int fieldIndex)
     {
         if (ActivePlayer == Player.One && PlayerOneReachedBase)
         {
-            HomeList.Add(new Chip(0, ActivePlayer));
+            if (moveOption == TotalFieldSpaces)
+            {
+                HomeList.Add(new Chip(0, ActivePlayer, new MoveOption(diceNumber)));
+            }
+            else
+            {
+                bool chipsBehind = false;
+                for (int index = TotalFieldSpaces-6; index < fieldIndex; index++)
+                {
+                    if(GameField[index].Count(chip => chip.Player == ActivePlayer) > 0)
+                    {
+                        chipsBehind = true;
+                    }
+                }
+
+                if (!chipsBehind)
+                {
+                    HomeList.Add(new Chip(0, ActivePlayer, new MoveOption(diceNumber)));
+                }
+            }
         }
+
         else if (ActivePlayer == Player.Two && PlayerTwoReachedBase)
         {
-            HomeList.Add(new Chip(0, ActivePlayer));
+            if (moveOption == -1)
+            {
+                HomeList.Add(new Chip(0, ActivePlayer, new MoveOption(diceNumber)));
+            }
+            else
+            {
+                bool chipsBehind = false;
+                for (int index = fieldIndex; index < 6; index++)
+                {
+                    if(GameField[index].Count(chip => chip.Player == ActivePlayer) > 0)
+                    {
+                        chipsBehind = true;
+                    }
+                }
+
+                if (!chipsBehind)
+                {
+                    HomeList.Add(new Chip(0, ActivePlayer, new MoveOption(diceNumber)));
+                }
+            }
         }
     }
 
@@ -523,31 +603,55 @@ public class BackgammonViewModel
     {
         ActivePlayer = Player.One;
         GameField.Clear();
-        GameField.Add(CreateChips(0, 2, Player.One));
+        //GameField.Add(CreateChips(0, 2, Player.One));
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(CreateChips(5, 5, Player.Two));
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(CreateChips(7, 3, Player.Two));
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(CreateChips(11, 5, Player.One));
+        //GameField.Add(CreateChips(12, 5, Player.Two));
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(CreateChips(16, 3, Player.One));
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(CreateChips(18, 5, Player.One));
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(CreateChips(23, 2, Player.Two));
+
+        GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(CreateChips(5, 5, Player.Two));
         GameField.Add(new List<Chip>());
-        GameField.Add(CreateChips(7, 3, Player.Two));
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
-        GameField.Add(CreateChips(11, 5, Player.One));
-        GameField.Add(CreateChips(12, 5, Player.Two));
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
-        GameField.Add(CreateChips(16, 3, Player.One));
+        GameField.Add(new List<Chip>());
+        GameField.Add(new List<Chip>());
+        GameField.Add(new List<Chip>());
+        GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(CreateChips(18, 5, Player.One));
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
-        GameField.Add(CreateChips(23, 2, Player.Two));
-
+        GameField.Add(new List<Chip>());
         HomeList.Clear();
         PlayerOneReachedBase = false;
         PlayerTwoReachedBase = false;

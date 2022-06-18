@@ -17,7 +17,9 @@
                 {
                     if(chip.Player == Player.Two)
                     {
-                        <div class="chip-home @("player" + chip.Player.ToString())"></div>
+                        <div class="chip-home @("player" + chip.Player.ToString())" @onclick="() => viewModel.MoveToHome(chip)">
+
+                        </div>
                     }
                 }
             </div>
@@ -80,7 +82,9 @@
                 {
                     if(chip.Player == Player.One)
                     {
-                        <div class="chip-home @("player" + chip.Player.ToString())"></div>
+                        <div class="chip-home @("player" + chip.Player.ToString())" @onclick="() => viewModel.MoveToHome(chip)">
+
+                        </div>
                     }
                 }
             </div>

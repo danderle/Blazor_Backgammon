@@ -19,6 +19,9 @@ namespace Blazor_Backgammon.Models
         /// </summary>
         public bool IsSelected { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool IsMoveOption { get; set; }
 
         /// <summary>
@@ -26,6 +29,9 @@ namespace Blazor_Backgammon.Models
         /// </summary>
         public int FieldIndex { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public MoveOption MoveOption { get; set; }
 
         #endregion
@@ -40,7 +46,7 @@ namespace Blazor_Backgammon.Models
         {
             Player = player;
             FieldIndex = fieldIndex;
-            IsMoveOption = moveOption != null;
+            IsMoveOption = (moveOption != null);
             MoveOption = moveOption;
         } 
         
