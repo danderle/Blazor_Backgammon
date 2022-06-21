@@ -20,7 +20,7 @@ namespace Blazor_Backgammon.Models
         public bool IsSelected { get; set; }
 
         /// <summary>
-        /// 
+        /// Flag to let us know if this is a move option
         /// </summary>
         public bool IsMoveOption { get; set; }
 
@@ -30,7 +30,7 @@ namespace Blazor_Backgammon.Models
         public int FieldIndex { get; set; }
 
         /// <summary>
-        /// 
+        /// The move option object
         /// </summary>
         public MoveOption MoveOption { get; set; }
 

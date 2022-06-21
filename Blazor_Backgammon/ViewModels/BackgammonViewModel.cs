@@ -161,8 +161,14 @@ public class BackgammonViewModel
             return;
         }
 
-        // We habe selected or deselected a chip
+        // We have selected or deselected a chip
         var chips = GetPlayerChipsAtIndex(chip.FieldIndex);
+        if (AnyChipSelected(chip.FieldIndex))
+        {
+            DeselectAllChips();
+        }
+
+        RemoveMoveOptions();
         chips.Last().IsSelected ^= true;
 
         // if we selected a chip then show move options
@@ -172,7 +178,8 @@ public class BackgammonViewModel
         }
         else
         {
-            RemoveSelectedChipAndChipOptions();
+            DeselectAllChips();
+
         }
     }
 
@@ -256,7 +263,7 @@ public class BackgammonViewModel
     }
 
     /// <summary>
-    /// 
+    /// Moves the chip into home base
     /// </summary>
     /// <param name="chip"></param>
     public void MoveToHome(Chip chip)
@@ -264,7 +271,15 @@ public class BackgammonViewModel
         if (chip.IsMoveOption)
         {
             chip.IsMoveOption = false;
-            DiceNumbers.Remove(chip.MoveOption.DiceNumber);
+
+            if (!_doubles)
+            {
+                DiceNumbers.Remove(chip.MoveOption.DiceNumber);
+            }
+            else
+            {
+                DiceNumbers.RemoveRange(0, chip.MoveOption.DiceNumber/DiceNumbers.Last());
+            }
 
             RemoveSelectedChipAndChipOptions();
 
@@ -279,6 +294,81 @@ public class BackgammonViewModel
     #endregion
 
     #region Private Methods
+
+    /// <summary>
+    /// Checks if there are any chips selected except for the given fieldIndex
+    /// </summary>
+    /// <param name="fieldIndex"></param>
+    /// <returns></returns>
+    private bool AnyChipSelected(int fieldIndex)
+    {
+        foreach (var list in GameField)
+        {
+            foreach (var chip in list)
+            {
+                if (chip.FieldIndex != fieldIndex && chip.IsSelected)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Removes only chips which are move options
+    /// </summary>
+    private void RemoveMoveOptions()
+    {
+        var chipsToRemove = new List<Chip>();
+        foreach (List<Chip> chipList in GameField)
+        {
+            foreach (Chip chip in chipList)
+            {
+                if (chip.Player != ActivePlayer)
+                {
+                    continue;
+                }
+
+                if (chip.IsMoveOption)
+                {
+                    chipsToRemove.Add(chip);
+                }
+            }
+
+            lock (chipList)
+            {
+                foreach (Chip chip in chipsToRemove)
+                {
+                    chipList.Remove(chip);
+                }
+            }
+        }
+
+        foreach (var chip in HomeList)
+        {
+            if (chip.IsMoveOption)
+            {
+                HomeList.Remove(chip);
+                break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Deselects all chips
+    /// </summary>
+    private void DeselectAllChips()
+    {
+        foreach (List<Chip> list in GameField)
+        {
+            foreach (Chip chip in list)
+            {
+                chip.IsSelected = false;
+            }
+        }
+    }
 
     /// <summary>
     /// Make the move option to a new position on the board
@@ -373,7 +463,7 @@ public class BackgammonViewModel
 
             for (int index = 6; index < TotalFieldSpaces; index++)
             {
-                if(GameField[index].Count(chip => chip.Player > Player.Two) > 0)
+                if(GameField[index].Count(chip => chip.Player == Player.Two) > 0)
                 {
                     PlayerTwoReachedBase = false;
                     return;
@@ -480,12 +570,13 @@ public class BackgammonViewModel
         // If no doubles and we have more than 1 dice number left to use or exactly 1 dice left
         if ((DiceNumbers.Count > 1 && !_doubles) || DiceNumbers.Count == 1)
         {
+            int moveOptionCounter = 0;
             foreach (var number in DiceNumbers)
             {
                 var moveOption = fieldIndex + (moveDirection * number);
                 if (moveOption < TotalFieldSpaces && moveOption >= 0)
                 {
-                    AddMoveOption(moveOption, number);
+                    moveOptionCounter += AddMoveOption(moveOption, number)? 1 : 0;
                 }
                 else
                 {
@@ -494,7 +585,7 @@ public class BackgammonViewModel
             }
 
             // Add sum dicenumber move options
-            if (DiceNumbers.Count > 1)
+            if (DiceNumbers.Count > 1 && moveOptionCounter >= 1)
             {
                 var sum = DiceNumbers.Sum();
                 var sumOption = fieldIndex + (moveDirection * sum);
@@ -518,6 +609,14 @@ public class BackgammonViewModel
                         return;
                     }
                 }
+                else
+                {
+                    if (!CheckIfPlayerCanClearChip(sum, moveOption, fieldIndex))
+                    {
+                        return;
+                    }
+
+                }
             }
         }
     }
@@ -526,13 +625,13 @@ public class BackgammonViewModel
     /// Check if player can clear a chip from the base
     /// </summary>
     /// <param name="diceNumber"></param>
-    private void CheckIfPlayerCanClearChip(int diceNumber, int moveOption, int fieldIndex)
+    private bool CheckIfPlayerCanClearChip(int diceNumber, int moveOption, int fieldIndex)
     {
         if (ActivePlayer == Player.One && PlayerOneReachedBase)
         {
             if (moveOption == TotalFieldSpaces)
             {
-                HomeList.Add(new Chip(0, ActivePlayer, new MoveOption(diceNumber)));
+                AddMoveOptionToHomeList(diceNumber);
             }
             else
             {
@@ -547,7 +646,18 @@ public class BackgammonViewModel
 
                 if (!chipsBehind)
                 {
-                    HomeList.Add(new Chip(0, ActivePlayer, new MoveOption(diceNumber)));
+                    if (_doubles)
+                    {
+                        if (fieldIndex + diceNumber >= TotalFieldSpaces)
+                        {
+                            AddMoveOptionToHomeList(diceNumber);
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        AddMoveOptionToHomeList(diceNumber);
+                    }
                 }
             }
         }
@@ -556,12 +666,12 @@ public class BackgammonViewModel
         {
             if (moveOption == -1)
             {
-                HomeList.Add(new Chip(0, ActivePlayer, new MoveOption(diceNumber)));
+                AddMoveOptionToHomeList(diceNumber);
             }
             else
             {
                 bool chipsBehind = false;
-                for (int index = fieldIndex; index < 6; index++)
+                for (int index = fieldIndex+1; index < 6; index++)
                 {
                     if(GameField[index].Count(chip => chip.Player == ActivePlayer) > 0)
                     {
@@ -571,10 +681,39 @@ public class BackgammonViewModel
 
                 if (!chipsBehind)
                 {
-                    HomeList.Add(new Chip(0, ActivePlayer, new MoveOption(diceNumber)));
+                    if (_doubles)
+                    {
+                        if (fieldIndex - diceNumber < 0)
+                        {
+                            AddMoveOptionToHomeList(diceNumber);
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        AddMoveOptionToHomeList(diceNumber);
+                    }
                 }
             }
         }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Adds move options to the home list, but only 1 at a time
+    /// </summary>
+    /// <param name="diceNumber"></param>
+    /// <returns></returns>
+    private bool AddMoveOptionToHomeList(int diceNumber)
+    {
+        if (HomeList.Any(chip => chip.IsMoveOption))
+        {
+            return false;
+        }
+
+        HomeList.Add(new Chip(0, ActivePlayer, new MoveOption(diceNumber)));
+        return true;
     }
 
     /// <summary>
@@ -603,55 +742,55 @@ public class BackgammonViewModel
     {
         ActivePlayer = Player.One;
         GameField.Clear();
-        //GameField.Add(CreateChips(0, 2, Player.One));
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(CreateChips(5, 5, Player.Two));
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(CreateChips(7, 3, Player.Two));
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(CreateChips(11, 5, Player.One));
-        //GameField.Add(CreateChips(12, 5, Player.Two));
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(CreateChips(16, 3, Player.One));
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(CreateChips(18, 5, Player.One));
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(new List<Chip>());
-        //GameField.Add(CreateChips(23, 2, Player.Two));
-
-        GameField.Add(new List<Chip>());
+        GameField.Add(CreateChips(0, 2, Player.One));
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(CreateChips(5, 5, Player.Two));
         GameField.Add(new List<Chip>());
+        GameField.Add(CreateChips(7, 3, Player.Two));
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
+        GameField.Add(CreateChips(11, 5, Player.One));
+        GameField.Add(CreateChips(12, 5, Player.Two));
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
-        GameField.Add(new List<Chip>());
-        GameField.Add(new List<Chip>());
-        GameField.Add(new List<Chip>());
-        GameField.Add(new List<Chip>());
+        GameField.Add(CreateChips(16, 3, Player.One));
         GameField.Add(new List<Chip>());
         GameField.Add(CreateChips(18, 5, Player.One));
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
         GameField.Add(new List<Chip>());
-        GameField.Add(new List<Chip>());
+        GameField.Add(CreateChips(23, 2, Player.Two));
+
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(CreateChips(5, 5, Player.Two));
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(CreateChips(18, 5, Player.One));
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
+        //GameField.Add(new List<Chip>());
         HomeList.Clear();
         PlayerOneReachedBase = false;
         PlayerTwoReachedBase = false;

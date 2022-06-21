@@ -8,6 +8,17 @@
 <body>
 
     @*<h1 class="welcome">Welcome to Backgammon</h1>*@
+    <button class="test" @onclick="() => viewModel.StartGame()">Start Game</button>
+    <button class="rollDiceButton @(viewModel.HideRollDiceButton?"hide":"")" @onclick="() => viewModel.RollDice()">
+        @(viewModel.ActivePlayer == Player.One? "Player 1" : "Player 2") Roll Dice
+    </button>
+    <button class="test @(viewModel.HideSkipTurnButton?"hide":"")" @onclick="() => viewModel.SwitchPlayer()">Skip Turn</button>
+    <div>
+        @foreach(var number in viewModel.DiceNumbers)
+        {
+            <div class="dice">@number</div>
+        }
+    </div>
 
     <div class="container-board ">
     
@@ -17,8 +28,8 @@
                 {
                     if(chip.Player == Player.Two)
                     {
-                        <div class="chip-home @("player" + chip.Player.ToString())" @onclick="() => viewModel.MoveToHome(chip)">
-
+                        <div class="chip-home @("player" + chip.Player.ToString()) + @(chip.IsMoveOption?"moveOption":"")"
+                        @onclick="() => viewModel.MoveToHome(chip)">
                         </div>
                     }
                 }
@@ -82,8 +93,8 @@
                 {
                     if(chip.Player == Player.One)
                     {
-                        <div class="chip-home @("player" + chip.Player.ToString())" @onclick="() => viewModel.MoveToHome(chip)">
-
+                        <div class="chip-home @("player" + chip.Player.ToString()) + @(chip.IsMoveOption?"moveOption":"")"
+                        @onclick="() => viewModel.MoveToHome(chip)">
                         </div>
                     }
                 }
@@ -138,17 +149,6 @@
 
     </div>
 
-    <button class="test" @onclick="() => viewModel.StartGame()">Start Game</button>
-    <button class="rollDiceButton @(viewModel.HideRollDiceButton?"hide":"")" @onclick="() => viewModel.RollDice()">
-        @(viewModel.ActivePlayer == Player.One? "Player 1" : "Player 2") Roll Dice
-    </button>
-    <button class="test @(viewModel.HideSkipTurnButton?"hide":"")" @onclick="() => viewModel.SwitchPlayer()">Skip Turn</button>
-    <div>
-        @foreach(var number in viewModel.DiceNumbers)
-        {
-            <div class="dice">@number</div>
-        }
-    </div>
 </body>
 
 
