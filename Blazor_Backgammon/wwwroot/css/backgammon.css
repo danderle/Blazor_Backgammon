@@ -1,12 +1,28 @@
+
+.main-container{
+    display: flex;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    margin: 100px;
+    width: 300px;
+    align-items: center;
+    justify-content: space-between;
+    row-gap: 30px;
+}
+
 .game-board-top {
     display: inline-flex;
     flex-direction: row;
     justify-content: center;
     border-color: #934b00;
     border-radius: 0px 10px 0px 0px;
-    border-width: 20px 20px 0px 0px;
+    border-width: 20px 70px 0px 0px;
     border-style: solid;
 }
+
 .left-border-top {
     background-color: #934b00;
     width: 70px; 
@@ -42,7 +58,7 @@
     justify-content: center;
     border-color: #934b00;
     border-radius: 0px 0px 10px 0px;
-    border-width: 0px 20px 20px 0px;
+    border-width: 0px 70px 20px 0px;
     border-style: solid;
 }
 
@@ -102,28 +118,6 @@
 .rainbow-text {
     background: -webkit-linear-gradient(#eee, #333);
     -webkit-text-fill-color: transparent;
-}
-
-.rollDiceButton {
-    text-align: center;
-    background-color: red;
-    border-block-color: black;
-    border-style: solid;
-    border-width: 2px;
-    border-radius: 5px;
-}
-
-.hide {
-    display: none;
-}
-
-.test {
-    text-align: center;
-    background-color: red;
-    border-block-color: black;
-    border-style: solid;
-    border-width: 2px;
-    border-radius: 5px;
 }
 
 

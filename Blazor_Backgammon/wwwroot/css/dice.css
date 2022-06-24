@@ -3,4 +3,7 @@
     border: 2px solid black;
     background-color: #eee9de;
     font-size: 30px;
+    margin: 5px;
+    padding: 0px 12px 0px 12px;
+    border-radius: 5px;
 }

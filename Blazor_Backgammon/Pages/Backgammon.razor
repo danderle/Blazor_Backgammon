@@ -7,146 +7,155 @@
 <header></header>
 <body>
 
-    @*<h1 class="welcome">Welcome to Backgammon</h1>*@
-    <button class="test" @onclick="() => viewModel.StartGame()">Start Game</button>
-    <button class="rollDiceButton @(viewModel.HideRollDiceButton?"hide":"")" @onclick="() => viewModel.RollDice()">
-        @(viewModel.ActivePlayer == Player.One? "Player 1" : "Player 2") Roll Dice
-    </button>
-    <button class="test @(viewModel.HideSkipTurnButton?"hide":"")" @onclick="() => viewModel.SwitchPlayer()">Skip Turn</button>
-    <div>
-        @foreach(var number in viewModel.DiceNumbers)
-        {
-            <div class="dice">@number</div>
-        }
-    </div>
-
-    <div class="container-board ">
-    
-        <div class="left-border-top">
-            <div class="container-home-top @(viewModel.PlayerTwoReachedBase?"":"hide")">
-                @foreach(var chip in viewModel.HomeList)
+    <div class="main-container">
+        <div class="button-container">
+            <button class="start button @(viewModel.HideStartGameButton?"hide":"")" @onclick="() => viewModel.StartGame()">Start Game</button>
+            <button class="roll-dice button @(viewModel.HideRollDiceButton?"hide":"")" @onclick="() => viewModel.RollDice()">
+                @(viewModel.ActivePlayer == Player.One? "Player 1" : "Player 2") Roll Dice
+            </button>
+            <div>
+                @foreach(var number in viewModel.DiceNumbers)
                 {
-                    if(chip.Player == Player.Two)
-                    {
-                        <div class="chip-home @("player" + chip.Player.ToString()) + @(chip.IsMoveOption?"moveOption":"")"
-                        @onclick="() => viewModel.MoveToHome(chip)">
-                        </div>
-                    }
+                    <div class="dice">@number</div>
                 }
             </div>
-        </div>
-
-        <div class="game-board-top">
-            @for(int index = 0; index < viewModel.HalfFieldSpaces; index++)
-            {
-                @if(index % 2 == 0)
-                {
-                    <div class="darkgreen-top field">
-                        @foreach(var playerChip in viewModel.GetPlayerChipsAtIndex(index))
-                        {
-                            <div @onclick="() => viewModel.MoveChip(playerChip)" 
-                                class="chip @("player" + playerChip.Player.ToString() + 
-                                (playerChip.IsSelected? " isSelected" : "") + 
-                                (playerChip.IsMoveOption? " moveOption" : ""))">
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="darkmaroon-top field">
-                        @foreach(var playerChip in viewModel.GetPlayerChipsAtIndex(index))
-                        {
-                            <div @onclick="() => viewModel.MoveChip(playerChip)"
-                                class="chip @("player" + playerChip.Player.ToString() + 
-                                (playerChip.IsSelected? " isSelected" : "") + 
-                                (playerChip.IsMoveOption? " moveOption" : ""))">
-                            </div>
-                        }
-                    </div>
-                }
-
-                @if(index == 5)
-                {
-                    <div class="field middle-top">
-                        @foreach(var chip in viewModel.ExiledChips)
-                        {
-                            if(chip.Player == Player.One)
-                            {
-                                <div @onclick="() => viewModel.ReturnExiledChip(chip)"
-                                    class="chip @("player" + chip.Player.ToString() +
-                                    (chip.IsSelected? " isSelected" : ""))">
-                                </div>
-                            }
-                        }
-                    </div>
-                }
-            }
-        </div>
-
-    </div>
-    <div class="container-board">
-    
-        <div class="left-border-bottom">
-            <div class="container-home-bottom @(viewModel.PlayerOneReachedBase?"":"hide")">
-                @foreach(var chip in viewModel.HomeList)
-                {
-                    if(chip.Player == Player.One)
-                    {
-                        <div class="chip-home @("player" + chip.Player.ToString()) + @(chip.IsMoveOption?"moveOption":"")"
-                        @onclick="() => viewModel.MoveToHome(chip)">
-                        </div>
-                    }
-                }
+            <div>
+                <div class="currentplayer chip @("player" + viewModel.ActivePlayer.ToString())">
+                    <div stlye="display: inline-block">@(viewModel.ActivePlayer == Player.One?"Player 1":"Player 2") turn</div>
+                </div>
             </div>
+            <button class="skip-turn button @(viewModel.HideSkipTurnButton?"hide":"")" @onclick="() => viewModel.SwitchPlayer()">Skip Turn</button>
+            <button class="reset button">Reset Game</button>
         </div>
-        <div class="game-board-bottom">
-            @for(int index = viewModel.HalfFieldSpaces; index < viewModel.TotalFieldSpaces; index++)
-            {
-                @if(index % 2 == 0)
-                {
-                    <div class="darkgreen-bottom field">
-                        @foreach(var playerChip in viewModel.GetPlayerChipsAtIndex(index))
-                        {
-                            <div @onclick="() => viewModel.MoveChip(playerChip)"
-                                class="chip @(("player" + playerChip.Player.ToString()) + 
-                                (playerChip.IsSelected? " isSelected" : "") + 
-                                (playerChip.IsMoveOption? " moveOption" : ""))">
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="darkmaroon-bottom field">
-                        @foreach(var playerChip in viewModel.GetPlayerChipsAtIndex(index))
-                        {
-                            <div @onclick="() => viewModel.MoveChip(playerChip)"
-                                class="chip @("player" + playerChip.Player.ToString() +
-                                (playerChip.IsSelected? " isSelected" : "") + 
-                                (playerChip.IsMoveOption? " moveOption" : ""))">
-                            </div>
-                        }
-                    </div>
-                }
-                @if(index == 17)
-                {
-                    <div class="field middle-bottom">
-                        @foreach(var chip in viewModel.ExiledChips)
+
+        <div>
+            <div class="container-board ">
+    
+                <div class="left-border-top">
+                    <div class="container-home-top @(viewModel.PlayerTwoReachedBase?"":"hide")">
+                        @foreach(var chip in viewModel.HomeList)
                         {
                             if(chip.Player == Player.Two)
                             {
-                                <div @onclick="() => viewModel.ReturnExiledChip(chip)"
-                                    class="chip @("player" + chip.Player.ToString() + 
-                                    (chip.IsSelected? " isSelected" : ""))">
+                                <div class="chip-home @("player" + chip.Player.ToString()) + @(chip.IsMoveOption?"moveOption":"")"
+                                @onclick="() => viewModel.MoveToHome(chip)">
                                 </div>
                             }
                         }
                     </div>
-                }
-            }
-        </div>
+                </div>
 
+                <div class="game-board-top">
+                    @for(int index = 0; index < viewModel.HalfFieldSpaces; index++)
+                    {
+                        @if(index % 2 == 0)
+                        {
+                            <div class="darkgreen-top field">
+                                @foreach(var playerChip in viewModel.GetPlayerChipsAtIndex(index))
+                                {
+                                    <div @onclick="() => viewModel.MoveChip(playerChip)" 
+                                        class="chip @("player" + playerChip.Player.ToString() + 
+                                        (playerChip.IsSelected? " isSelected" : "") + 
+                                        (playerChip.IsMoveOption? " moveOption" : ""))">
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="darkmaroon-top field">
+                                @foreach(var playerChip in viewModel.GetPlayerChipsAtIndex(index))
+                                {
+                                    <div @onclick="() => viewModel.MoveChip(playerChip)"
+                                        class="chip @("player" + playerChip.Player.ToString() + 
+                                        (playerChip.IsSelected? " isSelected" : "") + 
+                                        (playerChip.IsMoveOption? " moveOption" : ""))">
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        @if(index == 5)
+                        {
+                            <div class="field middle-top">
+                                @foreach(var chip in viewModel.ExiledChips)
+                                {
+                                    if(chip.Player == Player.One)
+                                    {
+                                        <div @onclick="() => viewModel.ReturnExiledChip(chip)"
+                                            class="chip @("player" + chip.Player.ToString() +
+                                            (chip.IsSelected? " isSelected" : ""))">
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="container-board">
+    
+                <div class="left-border-bottom">
+                    <div class="container-home-bottom @(viewModel.PlayerOneReachedBase?"":"hide")">
+                        @foreach(var chip in viewModel.HomeList)
+                        {
+                            if(chip.Player == Player.One)
+                            {
+                                <div class="chip-home @("player" + chip.Player.ToString()) + @(chip.IsMoveOption?"moveOption":"")"
+                                @onclick="() => viewModel.MoveToHome(chip)">
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="game-board-bottom">
+                    @for(int index = viewModel.HalfFieldSpaces; index < viewModel.TotalFieldSpaces; index++)
+                    {
+                        @if(index % 2 == 0)
+                        {
+                            <div class="darkgreen-bottom field">
+                                @foreach(var playerChip in viewModel.GetPlayerChipsAtIndex(index))
+                                {
+                                    <div @onclick="() => viewModel.MoveChip(playerChip)"
+                                        class="chip @(("player" + playerChip.Player.ToString()) + 
+                                        (playerChip.IsSelected? " isSelected" : "") + 
+                                        (playerChip.IsMoveOption? " moveOption" : ""))">
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="darkmaroon-bottom field">
+                                @foreach(var playerChip in viewModel.GetPlayerChipsAtIndex(index))
+                                {
+                                    <div @onclick="() => viewModel.MoveChip(playerChip)"
+                                        class="chip @("player" + playerChip.Player.ToString() +
+                                        (playerChip.IsSelected? " isSelected" : "") + 
+                                        (playerChip.IsMoveOption? " moveOption" : ""))">
+                                    </div>
+                                }
+                            </div>
+                        }
+                        @if(index == 17)
+                        {
+                            <div class="field middle-bottom">
+                                @foreach(var chip in viewModel.ExiledChips)
+                                {
+                                    if(chip.Player == Player.Two)
+                                    {
+                                        <div @onclick="() => viewModel.ReturnExiledChip(chip)"
+                                            class="chip @("player" + chip.Player.ToString() + 
+                                            (chip.IsSelected? " isSelected" : ""))">
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 
 </body>

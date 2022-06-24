@@ -32,12 +32,17 @@ public class BackgammonViewModel
     /// <summary>
     /// Flag to hide the roll dice button
     /// </summary>
-    public bool HideRollDiceButton { get; set; }
+    public bool HideRollDiceButton { get; set; } = true;
 
     /// <summary>
     /// Flag to hide the skip turn button
     /// </summary>
-    public bool HideSkipTurnButton { get; set; }
+    public bool HideSkipTurnButton { get; set; } = true;
+
+    /// <summary>
+    /// Flag to hide the start game button
+    /// </summary>
+    public bool HideStartGameButton { get; set; }
 
     /// <summary>
     /// The total number of spaces a player can move
@@ -134,6 +139,9 @@ public class BackgammonViewModel
     public void StartGame()
     {
         SetupGame();
+        HideStartGameButton = true;
+        HideRollDiceButton = false;
+        HideSkipTurnButton = false;
     }
 
     /// <summary>

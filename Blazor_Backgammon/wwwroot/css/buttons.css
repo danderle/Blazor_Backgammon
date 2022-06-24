@@ -1,0 +1,55 @@
+
+.roll-dice{
+    text-align: center;
+    background-color: red;
+    border-block-color: black;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 5px;
+    background-color: cornflowerblue;
+}
+.skip-turn{
+    background-color: orange;
+}
+
+.test {
+    text-align: center;
+    background-color: red;
+    border-block-color: black;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 5px;
+}
+
+.hide {
+    display: none;
+}
+
+.reset{
+    background-color: indianred;
+}
+
+.button {
+    text-align: center;
+    border-block-color: black;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 5px;
+    font-size: large;
+    font-weight: 900;
+    padding: 10px 20px 10px 20px;
+}
+
+.start{
+    background-color: chartreuse;
+}
+
+.currentplayer {
+    font-size: small;
+    font-weight: 900;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+}
+

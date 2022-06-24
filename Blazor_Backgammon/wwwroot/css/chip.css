@@ -4,6 +4,7 @@
     width: 100%;
     border-radius: 99px;
     background-color: transparent;
+    border: 1px solid black;
 }
 
 .chip-home {
